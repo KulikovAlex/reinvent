@@ -1,6 +1,6 @@
-package com.kulikov.demo.controlla;
+package com.mediumservice.medium.controlla;
 
-import com.kulikov.demo.models.SignUpData;
+import com.mediumservice.medium.models.SignUpData;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

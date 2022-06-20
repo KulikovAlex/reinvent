@@ -1,4 +1,4 @@
-package com.kulikov.demo.models;
+package com.mediumservice.medium.models;
 
 public class SignUpData {
 
