@@ -1,6 +1,7 @@
 package com.handlingservice.handling.requests;
 
 import com.handlingservice.handling.models.Coin;
+import com.handlingservice.handling.redis.CoinRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class HttpRequesterHandling {
@@ -21,12 +23,15 @@ public class HttpRequesterHandling {
 
     private RestTemplate restTemplate;
 
+    private CoinRepository coinRepository;
+
     private static final String baseURL = "https://api.coinpaprika.com/v1";
     private static final String coinRequestPath = "/coins";
 
     @Autowired
-    public HttpRequesterHandling(RestTemplate restTemplate) {
+    public HttpRequesterHandling(RestTemplate restTemplate, CoinRepository coinRepository) {
         this.restTemplate = restTemplate;
+        this.coinRepository = coinRepository;
     }
 
     @PostConstruct
@@ -42,7 +47,14 @@ public class HttpRequesterHandling {
         log.info("Response status from /coins : {}", responseEntity.getStatusCode());
         if (responseEntity.getStatusCode().equals(HttpStatus.OK)) {
 
-            responseEntity.getBody().stream().limit(10).forEach(e -> log.info(e.toString()));
+            List<Coin> resultList = responseEntity.getBody().stream().limit(100).peek(e -> log.debug(e.toString())).collect(Collectors.toList());
+            log.info("Going to store initial coins in Redis...");
+            if (coinRepository.count() > 0) {
+                coinRepository.saveAll(resultList);
+                log.info("Stored initial coins info in Redis");
+            } else {
+                log.info("Redis already contains coins info");
+            }
             return responseEntity.getBody();
         } else if (responseEntity.getStatusCode().equals(HttpStatus.TOO_MANY_REQUESTS)) {
             log.warn("Call requests limit exceeded, please try later...");
@@ -56,5 +68,6 @@ public class HttpRequesterHandling {
         //TODO
         return null;
     }
+
 
 }

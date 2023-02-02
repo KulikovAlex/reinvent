@@ -29,20 +29,6 @@ public class HttpRequesterMedium {
         this.restTemplate = restTemplate;
     }
 
-    @PostConstruct
-    private void initCoinsRequest() {
 
-        //requestCoinsList();
-
-    }
-
-    public void requestCoinsList() {
-        //TODO move to Redis
-    }
-
-    public Object describeCoinById() {
-        //TODO
-        return null;
-    }
-
+    // TODO Probably later it will be doing something, but for now just keep it empty
 }

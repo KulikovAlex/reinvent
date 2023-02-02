@@ -12,8 +12,8 @@ import javax.annotation.PostConstruct;
 
 
 @Component
-public class KafkaProducer {
-    private static final Logger log = LoggerFactory.getLogger(KafkaProducer.class);
+public class KafkaResponseProducer {
+    private static final Logger log = LoggerFactory.getLogger(KafkaResponseProducer.class);
     
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;

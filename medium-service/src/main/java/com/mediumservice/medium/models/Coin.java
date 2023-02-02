@@ -1,14 +1,20 @@
 package com.mediumservice.medium.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.data.redis.core.RedisHash;
+
 import java.io.Serializable;
 
+@RedisHash
 public class Coin implements Serializable {
 
     private String id;
     private String name;
     private String symbol;
     private int rank;
+    @JsonProperty("is_new")
     private boolean isNew;
+    @JsonProperty("is_active")
     private boolean isActive;
     private String type;
     //{"id":"btc-bitcoin","name":"Bitcoin","symbol":"BTC","rank":1,"is_new":false,"is_active":true,"type":"coin"}
