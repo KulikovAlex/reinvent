@@ -16,18 +16,18 @@ public class KafkaResponseProducer {
     private static final Logger log = LoggerFactory.getLogger(KafkaResponseProducer.class);
     
     @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private KafkaTemplate<String, Object> kafkaTemplate;
 
     @PostConstruct
     public void init() {
-        sendKafkaMessage();
+        //sendKafkaMessage();
     }
 
-    public void sendKafkaMessage() {
+    public void sendKafkaMessage(String key, Object payload) {
         String testPayload = "TESTTESTTESTTESTTEST";
-        String testTopic = "test-topic";
-        log.info("sending payload='{}' to topic='{}'", "TESTTESTTESTTESTTEST", "test-topic");
-        kafkaTemplate.send(testTopic, testPayload);
+        String testTopic = "response-topic";
+        log.info("sending payload='{}' to topic='{}'", payload, testTopic);
+        kafkaTemplate.send(testTopic, key, payload);
     }
 
 }

@@ -29,8 +29,8 @@ public class Controlla {
     }
 
     @GetMapping(value = "/coinById/{id}")
-    public ResponseEntity coinById(@PathVariable("id") String id) {
-        return coinService.retrieveCoinById();
+    public ResponseEntity coinById(@PathVariable("id") String coinId) {
+        return coinService.retrieveCoinById(coinId);
     }
 
 }

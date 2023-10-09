@@ -28,7 +28,7 @@ public class CoinService {
     }
 
     // TODO
-    public String retrieveCoinById() {
+    public String retrieveCoinById(String coinId) {
         // TODO implement
 
         //kafkaProducer.sentCommandRetrieveCoinByID(SpecificId);

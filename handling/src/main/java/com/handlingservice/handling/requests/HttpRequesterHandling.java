@@ -1,6 +1,8 @@
 package com.handlingservice.handling.requests;
 
+import com.handlingservice.handling.kafka.KafkaResponseProducer;
 import com.handlingservice.handling.models.Coin;
+import com.handlingservice.handling.models.CoinDescription;
 import com.handlingservice.handling.redis.CoinRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,10 +12,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -21,23 +25,27 @@ public class HttpRequesterHandling {
 
     private static Logger log = LoggerFactory.getLogger(HttpRequesterHandling.class);
 
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
-    private CoinRepository coinRepository;
+    private final CoinRepository coinRepository;
+
+    private final KafkaResponseProducer kafkaResponseProducer;
 
     private static final String baseURL = "https://api.coinpaprika.com/v1";
     private static final String coinRequestPath = "/coins";
 
     @Autowired
-    public HttpRequesterHandling(RestTemplate restTemplate, CoinRepository coinRepository) {
+    public HttpRequesterHandling(RestTemplate restTemplate, CoinRepository coinRepository, KafkaResponseProducer kafkaResponseProducer) {
         this.restTemplate = restTemplate;
         this.coinRepository = coinRepository;
+        this.kafkaResponseProducer = kafkaResponseProducer;
     }
 
     @PostConstruct
     private void initCoinsRequest() {
 
         requestCoinsList();
+        //describeCoinById("btc-bitcoin");
 
     }
 
@@ -64,9 +72,24 @@ public class HttpRequesterHandling {
         return null;
     }
 
-    public Object describeCoinById() {
+    public CoinDescription describeCoinById(String commandId, String coinId) {
+
         //TODO
-        return null;
+        //implement some coinId validation here :)
+        if (!isValidCoinId(coinId)) {
+            log.warn("Can't perform describeCoinById() - Coin Id is invalid or null: {}", coinId);
+        }
+
+        ResponseEntity<CoinDescription> responseEntity = restTemplate.exchange(baseURL + coinRequestPath + "/" + coinId, HttpMethod.GET,
+                null, CoinDescription.class);
+        log.info("Response status from describeCoinById; request: /coins/{} : {}", coinId, responseEntity.getStatusCode());
+
+        kafkaResponseProducer.sendKafkaMessage(commandId, responseEntity.getBody());
+        return responseEntity.getBody();
+    }
+
+    private boolean isValidCoinId(String coinId) {
+        return !ObjectUtils.isEmpty(coinId) && coinRepository.findById(coinId).isPresent();
     }
 
 
